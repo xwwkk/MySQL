@@ -99,5 +99,9 @@ select ... from ... where ... order by ...关键字顺序不能变
 + lower 转成小写
 + upper 转成大写
 + substr 取子串
-+ 
+	substr(字段名, 1, n)注意:起始下标为1
++ concat 进行字符串的拼接
+	concat(字段名1, 字段名2)
++ length 取长度
+
 
