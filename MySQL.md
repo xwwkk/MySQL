@@ -191,12 +191,135 @@ select ... from ... where ... group by... having... order by ...关键字顺序�
 
 当两张表进行连接查询， 没有任何条件限制的时候，最终查询的结果条数条数是两张表条数的乘积，这种现象被称为：笛卡尔积现象
 即前一张表的每一行都对应后一张表的全部行
+注意：根据笛卡尔积现象，表的连接次数越多效率越低，尽量避免表的连接次数
 
 避免笛卡尔积现象：加连接条件
 select 字段名 from 表名 where 表名1.字段名 = 表名2.字段名;
 但这样并不会减少匹配次数，还是两张表条数的乘积
 优化：例如select e.ename, d.dname from emp e, dept d where e.deptno = d.deptno;可以提高查询效率即不用取没有该字段名的表中找对应的字段名，不会减少匹配次数（SQL92语法）
 
+##### 内连接之等值连接
+SQL92语法：
+```sql
+	select
+		e.ename, d.dname
+	from
+		emp e, dept d
+	where
+		e.deptno = d.deptno;
+```
+SQL92的缺点：结构不清晰，表连接条件和后期进一步筛选的条件，都放在where后面
+
+SQL99语法：
+```sql
+	select
+		e.ename, d.dname
+	from
+		emp e
+	join 
+		dept d
+	on
+		e.deptno = d.deptno;
+```
+```sql
+	//inner可以省略
+	select
+		e.ename, d.dname
+	from
+		emp e
+	inner join
+		dept d
+	on
+		e.deptno = d.deptno; //条件是等值关系，所以叫等值连接
+```
+SQL99的有点：表连接条件是独立的，连接后如果需要进一步筛选，再往后加where
+
++ select ... from a join b on a和b的连接条件 where...
+
+##### 内连接之非等值连接
+条件不是一个等值连接，所以叫非等值连接
++ select ... from a join b on ... between ... and ...
+
+##### 内连接之自连接
+技巧：一张表看成两张表
+```sql	
+	select
+		a.ename as '员工名', b.ename as '领导名'
+	from
+		emp a
+	join
+		emp b
+	on
+		a.mgr = b.empno;
+```
+
+##### 外连接
+内连接的特点：完全能够匹配的这个条件的数据查询出来（A和B没有主次关系）
+外连接的特点：A和B有主次关系
+```sql
+select
+	e.ename, d.dname
+from 
+	emp e
+right outer join
+	dept d
+on
+	e.deptno = d.deptno;
+//outer是可以省略，带着可读性强
+```
+right代表将join关键字右边的这张表看成主表，主要是为将这张表的数据全部查询出来，带着关联查询左边的表
+带有right的是右外连接又叫做右连接
+带有left的是左外连接右加左连接
+
+##### 三张表，四张表的连接
++ select ... from a join b on a和b的连接条件 join c on a和c的连接条件 join d on a和d的连接条件
+一条sql中内连接和外连接都可以混合。
+```
+select
+	a.ename as emp, b.ename as leader, d.dname, a.sal, s.grade
+from
+	emp a
+left join
+	emp b
+on
+	a.mgr = b.empno
+join
+	dept d
+on
+	a.deptno = d.deptno
+join
+	salgrade s
+on
+	a.sal between s.losal and s.hisal;
+```
+
+#### 子查询
+select语句中嵌套select语句，被嵌套的select语句被称为子查询
++ select ...(select) from ...(select) where ...(select)
+1. where后面的子查询
+```sql
+	select ename, sal from emp where sal > (select avg(sal) from emp);
+```
+2. from后面的子查询
+```
+select
+	t.*, s.grade
+from
+	(select job, avg(sal) as avgsal from emp group by job) t
+join    
+	salgrade s
+on
+	t.avgsal between s.losal and s.hisal;
+```
+3.select后面出现的子查询（不常用）
+```sql
+select
+	e.ename, (select d.dname from dept d where e.deptno = d.deptno) as dname
+from 
+	emp e;
+```
+注意：对于select后面的子查询来说，这个子查询只能一次返回一条结果，否则报错
+	
 #### 去除重复记录
 注意：把查询结果去除重复记录，原表数据不变
 关键字：distinct
