@@ -105,6 +105,10 @@ select ... from ... where ... order by ...关键字顺序不能变
 + length 取长度
 + trim 去空格
 	trim(‘   名称’)
++ str_to_date
+	将字符串varchar类型转换成date类型
++ date_fromat
+	将date类型转化为一定格式的varchar字符串类型
 + format 设置千分位
 	format(字段名, 2) 保留两位小数
 + case..when..then..when..then..else..end
@@ -319,9 +323,113 @@ from
 	emp e;
 ```
 注意：对于select后面的子查询来说，这个子查询只能一次返回一条结果，否则报错
-	
+
+#### union合并查询结果集
++ select ... from ... union select ... from ...
+union的效率要高一些，对于表连接来说，每次连接新表，则匹配次数成倍的翻
+但是union可以减少匹配次数，还能完成结果集的拼接
+
+a 连接 b 连接 c
+a 10次记录
+b 10次记录
+c 10次记录
+匹配次数：1000次
+而union则是(a 连接 b) + (a 连接 c)则是200次
+
+注意：union在进行结果集合并的时候，要求两个结果集的列数相同
+
+#### limit将查询结果集的一部分取出（非常重要）
+通常使用于分页查询
++ select ... from ... limit startIndex, length
+起始下标默认从零开始
+
+注意：mysql当中limit在order by之后执行
+
+分页
+每页显示3条记录
+第一页：limit 0,3
+第二页：limit 3,3
+第三页：limit 6,3
+第四页：limit 9,3
+
+每页显示pageSize条记录
+第pageNo页：(limit pageNo-1)*pageSize, pageSize
+
+**大总结**
+```sal
+select
+	...
+where
+	...
+group by
+	...
+having
+	...
+order by
+	...
+limit
+	...
+```
+执行顺序：1.from 2.where 3.group by 4.having 5.select 6.order by 7.limit
+
 #### 去除重复记录
 注意：把查询结果去除重复记录，原表数据不变
 关键字：distinct
 + select distinct 字段名(可以多个即去除多个字段相同的行) from 表名;
 
+### DDL
+#### 表的操作
++ create table 表名(字段名1 数据类型, 字段名2 数据类型, 字段名3 数据类型 (default 值));
+表名建议以t_ 或者 tbl_开始
+
+MySQL中的数据类型
+常见的数据类型：
+	varchar(255)
+		可变长度的字符串（会根据实际的数据长度，动态分配空间）
+	char(255)
+		定长字符串
+	int(11)
+		整数型
+	bigint
+		长整型
+	float
+		单精度
+	double
+		双精度
+	date
+		短日期
+	datetime
+		长日期
+	clob
+		字符大对象
+		最多可以存储4G的字符串
+		比如：存储一篇文章
+	blob
+		二进制大对象
+		专门存储图片、声音、视频等流媒体数据
+		插入时得使用IO流
+注意：数据库中有一条命名规范
+	所有标识符都是全部小写，单词和单词之间使用下划线隔开
+
++ drop table (if exists)表名;
+
+### DML
++ insert into 表名(字段名1,字段名2...) value(值1,值2...)
+注意：字段名和值要一一对应
+	insert语句但凡执行成功了，那么必然会多一条记录
+	没给其他字段指定值时，则是null
+
+insert语句中的“字段名”可以省略
+即默认插入全部字段的值
+
+mysql的日期格式
+	%Y 年-%m-%Y
+	%m 月
+	%d 日
+	%h 时
+	%i 分
+	%s 秒
+str_to_date('01-10-1990', '%d-%m-%Y')
+str_to_date可以把字符串转为date类型，通常在插入时使用
+**注意**
+如果你的格式时%Y-%m-%d的话，就不需要使用str_to_date
