@@ -355,6 +355,13 @@ c 10次记录
 每页显示pageSize条记录
 第pageNo页：(limit pageNo-1)*pageSize, pageSize
 
+执行顺序：1.from 2.where 3.group by 4.having 5.select 6.order by 7.limit
+
+#### 去除重复记录
+注意：把查询结果去除重复记录，原表数据不变，distinct写在所有字段的前面
+关键字：distinct
++ select distinct 字段名(可以多个即去除多个字段相同的行) from 表名;
+
 **大总结**
 ```sal
 select
@@ -370,12 +377,6 @@ order by
 limit
 	...
 ```
-执行顺序：1.from 2.where 3.group by 4.having 5.select 6.order by 7.limit
-
-#### 去除重复记录
-注意：把查询结果去除重复记录，原表数据不变
-关键字：distinct
-+ select distinct 字段名(可以多个即去除多个字段相同的行) from 表名;
 
 ### DDL
 #### 表的操作
@@ -414,8 +415,10 @@ MySQL中的数据类型
 + drop table (if exists)表名;
 
 ### DML
+#### Insert
 + insert into 表名(字段名1,字段名2...) value(值1,值2...)
-注意：字段名和值要一一对应
+
+	注意：字段名和值要一一对应
 	insert语句但凡执行成功了，那么必然会多一条记录
 	没给其他字段指定值时，则是null
 
@@ -433,3 +436,24 @@ str_to_date('01-10-1990', '%d-%m-%Y')
 str_to_date可以把字符串转为date类型，通常在插入时使用
 **注意**
 如果你的格式时%Y-%m-%d的话，就不需要使用str_to_date
+
+date_format 可以将日期类型转化为字符串
+date_format(字段名, '日期格式')
+
+date和datetime两个类型的区别
+date只包括年月日信息
+datetime包括年月日时分秒信息 默认格式：%Y-%m-%d %h:%i:%s
+
+在mysql当中怎么获得系统当前时间
+now()函数 获得是datetime类型
+
+#### Update
++ update 表名 set 字段名1=值1,字段名2=值2... where ...;
+**注意**
+没有条件限制会导致所有数据全部更新
+
+#### Delete
++ delete from ... where ...;
+**注意**
+没有条件限制，整张表的数据会倍全部删除
+
